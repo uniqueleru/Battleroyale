@@ -1,0 +1,12 @@
+function setBordercenter(xLoc: number,zLoc: number):
+    execute console command "/worldborder center %{_xLoc}% %{_zLoc}%"
+
+function setBorder(size: number,time: number):
+    execute console command "/worldborder %{_size}% %{_time}%"
+    
+function makeRandomcenter(prevSize: number,newSize: number,prevCenter:numbers) :: numbers:
+    {_boundary} = 3
+
+command /test:
+    trigger:
+        send "asdasd" to player
