@@ -34,3 +34,16 @@ function makeIngameborder(phase: number,size: number,center: numbers):
     updateCompass()
     setBordercenter({BR.flag::borderCenter::x},{BR.flag::borderCenter::z})
     setBorder({_size},{_size}/{BR.flag::borderSpeed})
+
+function brBorderinit():
+    set {BR.flag::phase} to 1
+    set {BR.flag::borderSize} to {BR.data.borderSize::%{BR.flag::phase}%}
+    set {BR.flag::borderCenter::x} to random integer between -1000 and 1000
+    set {BR.flag::borderCenter::z} to random integer between -1000 and 1000
+    set {BR.flag::borderSpeed} to 3
+    makeIngameborder(1,{BR.flag::borderSize},{BR.flag::borderCenter::*})
+    #teamInit(2)
+
+command /testborder:
+    trigger:
+        

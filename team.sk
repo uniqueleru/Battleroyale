@@ -1,4 +1,4 @@
-function teamInit(size: number):
+function splitTeam(size: number):
     delete {BR.flag::team::*}
     set {_plist::*} to all players
     set {_num} to size of {_plist::*}
@@ -13,4 +13,10 @@ function teamInit(size: number):
         add loop-value to {BR.flag::team::%{_tmp}%::*}
         add 1 to {_tmp}
 
-    broadcast {BR.flag::team::*}
+function teamInit(size: number):
+    splitTeam({_size})
+    
+
+command /teamtest:
+    trigger:
+        teamInit(2)
