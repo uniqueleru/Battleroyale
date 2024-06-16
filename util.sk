@@ -67,7 +67,11 @@ on break:
         set {_rnd} to random integer between 1 and 5
         drop {_rnd} of copper ingot at event-block
         set block at event-block to air
-    
+    if event-block is sand:
+        cancel event
+        set {_rnd} to random integer between 1 and 1
+        drop {_rnd} of glass block at event-block
+        set block at event-block to air
 
 command /suplytest:
     trigger:
