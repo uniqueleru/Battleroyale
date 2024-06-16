@@ -2,29 +2,44 @@ options:
     p: &c( 배틀로얄 ) &f
 
 on load:
+    delete {BR.data.borderSize::*}
+    add 3000 to {BR.data.borderSize::*}
     add 2000 to {BR.data.borderSize::*}
     add 1000 to {BR.data.borderSize::*}
     add 500 to {BR.data.borderSize::*}
-    add 200 to {BR.data.borderSize::*}
     add 100 to {BR.data.borderSize::*}
     add 10 to {BR.data.borderSize::*}
+    add 0 to {BR.data.borderSize::*}
 
 function brGameinit(mode: text):
     set {BR.flag.isIngame} to true
     set {BR.flag.gametime} to 0
-    set {BR.delay} to 10
+    set {BR.delay} to 500
     brBorderinit()
     teamInit(2)
     while {BR.flag.phase} < 6:
-        if {BR.debug} is true:
-            stop
         if {BR.flag.isshrinking} is false:
             add 1 to {BR.flag.gametime}
             set {_left} to {BR.delay} - {BR.flag.gametime}
-            send action bar "&7페이즈: &c%{BR.flag.phase}% &f| &7자기장 크기: &c%{BR.flag.size}% &f| &7자기장 축소까지: &c%{_left}%초 남음" to all players
-        if {BR.flag.gametime} is {BR.delay}:
+            set {_x1} to {BR.flag.nextborderCenter.x} + ({BR.flag.size} / 2)
+            set {_x2} to {BR.flag.nextborderCenter.x} - ({BR.flag.size} / 2)
+            set {_z1} to {BR.flag.nextborderCenter.z} + ({BR.flag.size} / 2)
+            set {_z2} to {BR.flag.nextborderCenter.z} - ({BR.flag.size} / 2)
+            loop all players:
+                set {_xc} to x-coordinate of loop-player's location
+                set {_zc} to z-coordinate of loop-player's location
+                if brIsinnextborder({_xc},{_zc},{BR.flag.phase} + 1) is true:
+                    send action bar "&7자기장 크기: &c%{BR.flag.size}% &f| &7자기장 축소까지: &c%{_left}%초 남음 &f| &7다음 자기장 중앙: &c(%{BR.flag.nextborderCenter.x}%,%{BR.flag.nextborderCenter.z}%)" to loop-player
+                else:
+                    send action bar "&7자기장 크기: &c%{BR.flag.size}% &f| &7자기장 축소까지: &c%{_left}%초 남음 &f| &7다음 자기장 중앙: &c(%{BR.flag.nextborderCenter.x}%,%{BR.flag.nextborderCenter.z}%) &f| &4&l현재 다음 자기장 바깥에 있습니다!" to loop-player
+        if {BR.flag.gametime} >= {BR.delay}:
             set {BR.flag.gametime} to 0
+            set {BR.delay} to {BR.delay} - 80
             brShrinkborder()
+        if {BR.flag.gametime} is 20:
+            if {BR.flag.phase} > 1:
+                brSuply()
+                brSuply()
         wait 1 second
 
 command /br [<text>]:
@@ -36,8 +51,32 @@ command /br [<text>]:
             #if {BR.flag.isIngame} is true:
             #    send "{@p} 이미 게임이 진행중입니다." to player
             #else:
+            set {BR.flag.phase} to 10
+            wait 2 seconds
             brGameinit("default")
 
-on death:
-    if attacker is player:
-        drop 1 of gunpowder at victim's location
+
+
+command /총:
+    trigger:
+        make player execute command "/setblock ~ ~ ~ tacz:gun_smith_table"
+
+command /기본템설정:
+    trigger:
+        open chest inventory with 6 row named "기본템설정" to player
+        loop {BR.items::*}:
+            set slot (loop-counter)-1 of current inventory of player to loop-value
+
+command /기본템:
+    trigger:
+        copy {BR.items::*} to {_cpy::*}
+        give {_cpy::*} to player
+
+on inventory close:
+    if name of current inventory of player is "기본템설정":
+        delete {BR.items::*}
+        loop 54 times:
+            if slot (loop-counter)-1 of current inventory of player is not air:
+                add slot (loop-counter)-1 of current inventory of player to {BR.items::*}
+
+    

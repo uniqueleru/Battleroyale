@@ -8,16 +8,26 @@ function setBordercenter(prevsize: number, xLoc1: number,zLoc1: number,xLoc2: nu
     set {_zstep} to ({_zLoc2} - {_zLoc1}) / {_time}
     loop {_time} times:
         set {_perc} to round(loop-number/{_time}*100)
-        send action bar "&7페이즈: &c%{BR.flag.phase}% &f| &7자기장 크기: &c%{_prevsize}% &7> &c%{BR.flag.size}% &f| &7자기장 축소 진행률: &c%{_perc}%%%" to all players
+        if mod(loop-number, 60) is 0:
+            loop all players:
+                set {_xc} to x-coordinate of loop-player's location
+                set {_zc} to z-coordinate of loop-player's location
+                if brIsinnextborder({_xc},{_zc},{BR.flag.phase}) is false:
+                    send title "&f" with subtitle "&4&l[!] 자기장안으로 진입해야합니다!" to loop-player for 1 second
+        send action bar "&7자기장 크기: &c%{_prevsize}% &7> &c%{BR.flag.size}% &f| &7자기장 축소 진행률: &c%{_perc}%%% &f| &7자기장 중앙: &c( %{_xLoc2}%, %{_zLoc2}% )" to all players
         if {BR.debug} is true:
             stop
         add {_xstep} to {_xLoc1}
         add {_zstep} to {_zLoc1}
-        set {BR.flag.borderCenter::x} to {_xLoc1}
-        set {BR.flag.borderCenter::z} to {_zLoc1}
+        set {BR.flag.borderCenter.x} to {_xLoc2}
+        set {BR.flag.borderCenter.z} to {_zLoc2}
         execute console command "/worldborder center %{_xLoc1}% %{_zLoc1}%"
         wait 1 tick
     execute console command "/worldborder center %{_xLoc2}% %{_zLoc2}%"
+    set {_nextsize} to {BR.data.borderSize::%({BR.flag.phase} + 1)%}
+    set {_coords::*} to makeRandomcenter({BR.flag.size},{_nextsize},{BR.flag.borderCenter.x},{BR.flag.borderCenter.z})
+    set {BR.flag.nextborderCenter.x} to {_coords::1}
+    set {BR.flag.nextborderCenter.z} to {_coords::2}
     set {BR.flag.isshrinking} to false
 function setBorder(size: number,time: number):
     set {_time} to round({_time})
@@ -47,47 +57,44 @@ function makeIngameborder(phase: number,size: number,prevsize: number,centerx: n
     set {BR.flag.phase} to {_phase}
     set {BR.flag.size} to {_size}
     broadcast "{@p} 자기장이 줄어듭니다!"
-    updateCompass()
     set {_speed} to round(({_prevsize} - {_size})/{BR.flag.borderSpeed}*20)
-    setBordercenter({_prevsize}, {BR.flag.borderCenter::x},{BR.flag.borderCenter::z},{_centerx},{_centerz},{_speed})
+    setBordercenter({_prevsize}, {BR.flag.borderCenter.x},{BR.flag.borderCenter.z},{_centerx},{_centerz},{_speed})
     setBorder({_size},({_prevsize} - {_size})/{BR.flag.borderSpeed})
+    updateCompass()
 
 function brShrinkborder():
     set {_prevsize} to {BR.flag.size}
     set {BR.flag.phase} to {BR.flag.phase} + 1
     set {_newsize} to {BR.data.borderSize::%{BR.flag.phase}%}
-    broadcast "%{BR.flag.phase}% %{_newsize}%"
-    set {_coords::*} to makeRandomcenter({BR.flag.size},{_newsize},{BR.flag.borderCenter::x},{BR.flag.borderCenter::z})
-    set {BR.flag.borderSpeed} to 5
+    set {BR.flag.borderSpeed} to 3
     set {BR.flag.size} to {_newsize}
-    makeIngameborder({BR.flag.phase},{_newsize},{_prevsize},{_coords::1},{_coords::2})
+    makeIngameborder({BR.flag.phase},{_newsize},{_prevsize},{BR.flag.nextborderCenter.x},{BR.flag.nextborderCenter.z})
 
 function brBorderinit():
     set {BR.flag.phase} to 1
     set {BR.flag.borderSize} to {BR.data.borderSize::%{BR.flag.phase}%}
-    set {BR.flag.borderCenter::x} to random integer between -1000 and 1000
-    set {BR.flag.borderCenter::z} to random integer between -1000 and 1000
-    broadcast "%{BR.flag.borderCenter::x}%"
+    set {BR.flag.borderCenter.x} to random integer between -1000 and 1000
+    set {BR.flag.borderCenter.z} to random integer between -1000 and 1000
     set {BR.flag.borderSpeed} to 1000   
-    makeIngameborder(1,{BR.flag.borderSize},{BR.flag.borderSize},{BR.flag.borderCenter::x},{BR.flag.borderCenter::z})
+    makeIngameborder(1,{BR.flag.borderSize},{BR.flag.borderSize},{BR.flag.borderCenter.x},{BR.flag.borderCenter.z})
     
     #teamInit(2)
 
 function brGetspawnloc(type: text) :: location:
-    set {_space} to 5 #끝점에서 얼마나 여유를 두고 스폰시킬건지
+    set {_space} to 300 #끝점에서 얼마나 여유를 두고 스폰시킬건지
 
     if {_type} is "++":
-        set {_x} to {BR.flag.borderCenter::x} + ({BR.flag.borderSize} / 2) - {_space}
-        set {_z} to {BR.flag.borderCenter::z} + ({BR.flag.borderSize} / 2) - {_space}
+        set {_x} to {BR.flag.borderCenter.x} + ({BR.flag.borderSize} / 2) - {_space}
+        set {_z} to {BR.flag.borderCenter.z} + ({BR.flag.borderSize} / 2) - {_space}
     if {_type} is "--":
-        set {_x} to {BR.flag.borderCenter::x} - ({BR.flag.borderSize} / 2) + {_space}
-        set {_z} to {BR.flag.borderCenter::z} - ({BR.flag.borderSize} / 2) + {_space}
+        set {_x} to {BR.flag.borderCenter.x} - ({BR.flag.borderSize} / 2) + {_space}
+        set {_z} to {BR.flag.borderCenter.z} - ({BR.flag.borderSize} / 2) + {_space}
     if {_type} is "+-":
-        set {_x} to {BR.flag.borderCenter::x} + ({BR.flag.borderSize} / 2) - {_space}
-        set {_z} to {BR.flag.borderCenter::z} - ({BR.flag.borderSize} / 2) + {_space}
+        set {_x} to {BR.flag.borderCenter.x} + ({BR.flag.borderSize} / 2) - {_space}
+        set {_z} to {BR.flag.borderCenter.z} - ({BR.flag.borderSize} / 2) + {_space}
     if {_type} is "-+":
-        set {_x} to {BR.flag.borderCenter::x} - ({BR.flag.borderSize} / 2) + {_space}
-        set {_z} to {BR.flag.borderCenter::z} + ({BR.flag.borderSize} / 2) - {_space}
+        set {_x} to {BR.flag.borderCenter.x} - ({BR.flag.borderSize} / 2) + {_space}
+        set {_z} to {BR.flag.borderCenter.z} + ({BR.flag.borderSize} / 2) - {_space}
 
     set {_tmploc} to location at {_x}, 256, {_z} of the world "world"
     while block at {_tmploc} is air:
@@ -95,6 +102,15 @@ function brGetspawnloc(type: text) :: location:
         set y-coordinate of {_tmploc} to {_y} - 1
     set y-coordinate of {_tmploc} to {_y} + 1
     return {_tmploc}
+
+function brIsinnextborder(x: number,z: number,phase: number) :: boolean:
+    set {_newsize} to {BR.data.borderSize::%{_phase}%}
+    set {_centerx} to {BR.flag.nextborderCenter.x}
+    set {_centerz} to {BR.flag.nextborderCenter.z}
+    if {_x} is between ({_centerx} - {_newsize}/2) and ({_centerx} + {_newsize}/2):
+        if {_z} is between ({_centerz} - {_newsize}/2) and ({_centerz} + {_newsize}/2):
+            return true
+    return false
 
 command /testborder:
     trigger:
@@ -109,3 +125,7 @@ command /brdebug:
         wait 1 second
         set {BR.debug} to false
         set {BR.flag.isshrinking} to false
+
+command /brdebug2:
+    trigger:
+        set {BR.flag.gametime} to {BR.delay} - 5

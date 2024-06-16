@@ -2,9 +2,94 @@ options:
     p: &c( 배틀로얄 ) &f
 
 function updateCompass():
+    wait 2 seconds
     loop all players:
         set {_loc} to location of loop-player
-        set x coordinate of {_loc} to {BR.flag.center::x}
-        set z coordinate of {_loc} to {BR.flag.center::z}
+        set x coordinate of {_loc} to {BR.flag.nextborderCenter.x}
+        set z coordinate of {_loc} to {BR.flag.nextborderCenter.z}
         set loop-player's compass target to {_loc}
         send "{@p} 나침반이 업데이트 되었습니다" to loop-player
+
+function brSuply():
+    set {_tmp} to {BR.flag.phase} + 1
+    set {_newsize} to {BR.data.borderSize::%{BR.flag.phase}%}
+    set {_coords::*} to makeRandomcenter({_newsize},10,{BR.flag.nextborderCenter.x},{BR.flag.nextborderCenter.z})
+    set {_x} to {_coords::1}
+    set {_z} to {_coords::2}
+    set {_tmploc} to location at {_x}, 256, {_z} of the world "world"
+    while block at {_tmploc} is air:
+        set {_y} to y-coordinate of {_tmploc}
+        set y-coordinate of {_tmploc} to {_y} - 1
+    set y-coordinate of {_tmploc} to {_y}
+    set block at {_tmploc} to chest
+    set slot 0 of block at {_tmploc} to 5 of blaze rod
+    set {_int} to random integer between 0 and 2
+    set slot 1 of block at {_tmploc} to ({_int} of netherite ingot)
+    set {_int} to random integer between 5 and 10
+    set slot 2 of block at {_tmploc} to ({_int} of quartz)
+    set {_int} to random integer between 5 and 8
+    set slot 3 of block at {_tmploc} to ({_int} of glowstone dust)
+    set {_int} to random integer between 64 and 64
+    set slot 4 of block at {_tmploc} to ({_int} of iron ingot)
+    set {_int} to random integer between 30 and 64
+    set slot 5 of block at {_tmploc} to ({_int} of gold ingot)
+    broadcast "{@p} ( %{_x}%, %{_z}% ) 에 보급이 소환되었습니다!"
+
+on break:
+    if event-block is iron ore:
+        cancel event
+        set {_rnd} to random integer between 1 and 5
+        drop {_rnd} of iron ingot at event-block
+        set block at event-block to air
+    if event-block is deepslate iron ore:
+        cancel event
+        set {_rnd} to random integer between 1 and 5
+        drop {_rnd} of iron ingot at event-block
+        set block at event-block to air
+    if event-block is gold ore:
+        cancel event
+        set {_rnd} to random integer between 1 and 5
+        drop {_rnd} of gold ingot at event-block
+        set block at event-block to air
+    if event-block is deepslate gold ore:
+        cancel event
+        set {_rnd} to random integer between 1 and 5
+        drop {_rnd} of gold ingot at event-block
+        set block at event-block to air
+
+    if event-block is copper ore:
+        cancel event
+        set {_rnd} to random integer between 1 and 5
+        drop {_rnd} of copper ingot at event-block
+        set block at event-block to air
+    if event-block is deepslate copper ore:
+        cancel event
+        set {_rnd} to random integer between 1 and 5
+        drop {_rnd} of copper ingot at event-block
+        set block at event-block to air
+    
+
+command /suplytest:
+    trigger:
+        brSuply()
+
+command /밥:
+    trigger:
+        give 64 of bread to player
+
+on join:
+    set player's max health to 20
+    heal player
+on respawn:
+    set player's max health to 20
+    heal player
+on damage:
+    if attacker is not player:
+        set damage to damage / 2
+
+on death:
+    if attacker is player:
+        set {_rnd} to random integer between 1 and 3
+        drop {_rnd} of gunpowder at victim's location
+        chance of 10%:
+            drop 1 of amethyst shard at victim's location

@@ -12,6 +12,7 @@ function splitTeam(size: number):
         add loop-value to {BR.flag.team::%loop-iteration%::*}
 
 function teamTP():
+    execute console command "xp add @a 180 levels"
     loop 2 times: #왠진 모르겠는데 sublist 쓰면 첫번째 인덱스 루프가 그냥 박살남 ㅅㅂ 일단 임시로 이렇게 두고 만듬
         loop {BR.flag.team::%loop-number%::*}:
             if loop-number is 1:
