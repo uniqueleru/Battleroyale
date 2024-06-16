@@ -4,7 +4,7 @@ options:
 function updateCompass():
     loop all players:
         set {_loc} to location of loop-player
-        set x coordinate of {_loc} to {BR.flag::center::x}
-        set z coordinate of {_loc} to {BR.flag::center::z}
+        set x coordinate of {_loc} to {BR.flag.center::x}
+        set z coordinate of {_loc} to {BR.flag.center::z}
         set loop-player's compass target to {_loc}
         send "{@p} 나침반이 업데이트 되었습니다" to loop-player

@@ -6,13 +6,13 @@ function setBordercenter(xLoc: number,zLoc: number):
 
 function setBorder(size: number,time: number):
     set {_time} to round({_time})
-    execute console command "/worldborder %{_size}% %{_time}%"
+    execute console command "/worldborder set %{_size}% %{_time}%"
     
-function makeRandomcenter(prevSize: number,newSize: number,prevCenter:numbers) :: numbers:
-    set {x1} to {prevCenter::x} + ({_prevSize} / 2)
-    set {x2} to {prevCenter::x} - ({_prevSize} / 2)
-    set {z1} to {prevCenter::z} + ({_prevSize} / 2)
-    set {z2} to {prevCenter::z} - ({_prevSize} / 2)
+function makeRandomcenter(prevSize: number,newSize: number,prevCenterx:number,prevCenterz:number) :: numbers:
+    set {_x1} to {_prevCenterx} + ({_prevSize} / 2)
+    set {_x2} to {_prevCenterx} - ({_prevSize} / 2)
+    set {_z1} to {_prevCenterz} + ({_prevSize} / 2)
+    set {_z2} to {_prevCenterz} - ({_prevSize} / 2)
 
     add {_newSize} / 2 to {x1}
     subtract {_newSize} / 2 from {x2}
@@ -25,25 +25,53 @@ function makeRandomcenter(prevSize: number,newSize: number,prevCenter:numbers) :
 
     return {_ret::*}
 
-function makeIngameborder(phase: number,size: number,center: numbers):
-    set {BR.flag::borderCenter::x} to {_center::x}
-    set {BR.flag::borderCenter::z} to {_center::z}
-    set {BR.flag::phase} to {_phase}
-    set {BR.flag::size} to {_size}
+function makeIngameborder(phase: number,size: number,centerx: number,centerz: number):
+    set {BR.flag.borderCenter::x} to {_centerx}
+    set {BR.flag.borderCenter::z} to {_centerz}
+    set {BR.flag.phase} to {_phase}
+    set {BR.flag.size} to {_size}
     broadcast "{@p} 자기장이 줄어듭니다!"
     updateCompass()
-    setBordercenter({BR.flag::borderCenter::x},{BR.flag::borderCenter::z})
-    setBorder({_size},{_size}/{BR.flag::borderSpeed})
+    setBordercenter({BR.flag.borderCenter::x},{BR.flag.borderCenter::z})
+    setBorder({_size},{_size}/{BR.flag.borderSpeed})
 
 function brBorderinit():
-    set {BR.flag::phase} to 1
-    set {BR.flag::borderSize} to {BR.data.borderSize::%{BR.flag::phase}%}
-    set {BR.flag::borderCenter::x} to random integer between -1000 and 1000
-    set {BR.flag::borderCenter::z} to random integer between -1000 and 1000
-    set {BR.flag::borderSpeed} to 3
-    makeIngameborder(1,{BR.flag::borderSize},{BR.flag::borderCenter::*})
+    set {BR.flag.phase} to 1
+    set {BR.flag.borderSize} to {BR.data.borderSize::%{BR.flag.phase}%}
+    set {BR.flag.borderCenter::x} to random integer between -1000 and 1000
+    set {BR.flag.borderCenter::z} to random integer between -1000 and 1000
+    broadcast "%{BR.flag.borderCenter::x}%"
+    set {BR.flag.borderSpeed} to 1000   
+    makeIngameborder(1,{BR.flag.borderSize},{BR.flag.borderCenter::x},{BR.flag.borderCenter::z})
+    
     #teamInit(2)
+
+function brGetspawnloc(type: text) :: location:
+    set {_space} to 5 #끝점에서 얼마나 여유를 두고 스폰시킬건지
+
+    if {_type} is "++":
+        set {_x} to {BR.flag.borderCenter::x} + ({BR.flag.borderSize} / 2) - {_space}
+        set {_z} to {BR.flag.borderCenter::z} + ({BR.flag.borderSize} / 2) - {_space}
+    if {_type} is "--":
+        set {_x} to {BR.flag.borderCenter::x} - ({BR.flag.borderSize} / 2) + {_space}
+        set {_z} to {BR.flag.borderCenter::z} - ({BR.flag.borderSize} / 2) + {_space}
+    if {_type} is "+-":
+        set {_x} to {BR.flag.borderCenter::x} + ({BR.flag.borderSize} / 2) - {_space}
+        set {_z} to {BR.flag.borderCenter::z} - ({BR.flag.borderSize} / 2) + {_space}
+    if {_type} is "-+":
+        set {_x} to {BR.flag.borderCenter::x} - ({BR.flag.borderSize} / 2) + {_space}
+        set {_z} to {BR.flag.borderCenter::z} + ({BR.flag.borderSize} / 2) - {_space}
+
+    set {_tmploc} to location at {_x}, 256, {_z} of the world "world"
+    while block at {_tmploc} is air:
+        set {_y} to y-coordinate of {_tmploc}
+        set y-coordinate of {_tmploc} to {_y} - 1
+    set y-coordinate of {_tmploc} to {_y} + 1
+    return {_tmploc}
 
 command /testborder:
     trigger:
-        
+        brBorderinit()
+command /testborder2:
+    trigger:
+        brBorderinit()

@@ -10,7 +10,7 @@ on load:
     add 10 to {BR.data.borderSize::*}
 
 function brGameinit(mode: text):
-    set {BR.flag::isIngame} to true
+    set {BR.flag.isIngame} to true
     brBorderinit()
 
 command /br [<text>]:
@@ -19,9 +19,8 @@ command /br [<text>]:
             send "{@p} /br start" to player
             send "{@p} /br stop" to player
         if arg 1 is "start":
-            if {BR.flag::isIngame} is true:
+            if {BR.flag.isIngame} is true:
                 send "{@p} 이미 게임이 진행중입니다." to player
             else:
                 brGameinit("default")
-                delete {BR.flag::*}
 
