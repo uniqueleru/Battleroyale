@@ -1,0 +1,33 @@
+options:
+    p: &c( 배틀로얄 ) &f
+
+on load:
+    add 2000 to {BR.data.borderSize::*}
+    add 1000 to {BR.data.borderSize::*}
+    add 500 to {BR.data.borderSize::*}
+    add 200 to {BR.data.borderSize::*}
+    add 100 to {BR.data.borderSize::*}
+    add 10 to {BR.data.borderSize::*}
+
+function brStartgame(mode: text):
+    if {_mode} is "default":
+        set {BR.flag::isIngame} to true
+        set {BR.flag::phase} to 1
+        set {BR.flag::borderSize} to {BR.data.borderSize::%{BR.flag::phase}%}
+        set {BR.flag::borderCenter::x} to random integer between -1000 and 1000
+        set {BR.flag::borderCenter::z} to random integer between -1000 and 1000
+        set {BR.flag::borderSpeed} to 3
+        makeIngameborder(1,{BR.flag::borderSize},{BR.flag::borderCenter::*})
+        #teamInit(2)
+
+
+command /br [<text>]:
+    trigger:
+        if arg 1 is not set:
+            send "{@p} /br start" to player
+            send "{@p} /br stop" to player
+        if arg 1 is "start":
+            if {BR.flag::isIngame} is true:
+                send "{@p} 이미 게임이 진행중입니다." to player
+            else:
+                brStartgame("default")

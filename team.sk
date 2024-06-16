@@ -1,0 +1,16 @@
+function teamInit(size: number):
+    delete {BR.flag::team::*}
+    set {_plist::*} to all players
+    set {_num} to size of {_plist::*}
+    set {_playerperteam} to round({_num} / {_size})
+    loop {_size} times:
+        loop {_playerperteam} times:
+            set {_rnd} to random element out of {_plist::*}
+            remove {_rnd} from {_plist::*}
+            add {_rnd} to {BR.flag::team::%loop-number-1%::*}
+    set {_tmp} to 1
+    loop {_plist::*}:
+        add loop-value to {BR.flag::team::%{_tmp}%::*}
+        add 1 to {_tmp}
+
+    broadcast {BR.flag::team::*}

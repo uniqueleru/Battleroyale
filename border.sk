@@ -1,12 +1,36 @@
+options:
+    p: &c( 배틀로얄 ) &f
+
 function setBordercenter(xLoc: number,zLoc: number):
     execute console command "/worldborder center %{_xLoc}% %{_zLoc}%"
 
 function setBorder(size: number,time: number):
+    set {_time} to round({_time})
     execute console command "/worldborder %{_size}% %{_time}%"
     
 function makeRandomcenter(prevSize: number,newSize: number,prevCenter:numbers) :: numbers:
-    {_boundary} = 3
+    set {x1} to {prevCenter::x} + ({_prevSize} / 2)
+    set {x2} to {prevCenter::x} - ({_prevSize} / 2)
+    set {z1} to {prevCenter::z} + ({_prevSize} / 2)
+    set {z2} to {prevCenter::z} - ({_prevSize} / 2)
 
-command /test:
-    trigger:
-        send "asdasd" to player
+    add {_newSize} / 2 to {x1}
+    subtract {_newSize} / 2 from {x2}
+
+    add {_newSize} / 2 to {z1}
+    subtract {_newSize} / 2 from {z2}
+
+    set {_ret::x} to random integer between {_x1} and {_x2}
+    set {_ret::z} to random integer between {_z1} and {_z2}
+
+    return {_ret::*}
+
+function makeIngameborder(phase: number,size: number,center: numbers):
+    set {BR.flag::borderCenter::x} to {_center::x}
+    set {BR.flag::borderCenter::z} to {_center::z}
+    set {BR.flag::phase} to {_phase}
+    set {BR.flag::size} to {_size}
+    broadcast "{@p} 자기장이 줄어듭니다!"
+    updateCompass()
+    setBordercenter({BR.flag::borderCenter::x},{BR.flag::borderCenter::z})
+    setBorder({_size},{_size}/{BR.flag::borderSpeed})
