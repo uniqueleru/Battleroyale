@@ -1,9 +1,24 @@
 options:
     p: &c( 배틀로얄 ) &f
 
-function setBordercenter(xLoc: number,zLoc: number):
-    execute console command "/worldborder center %{_xLoc}% %{_zLoc}%"
-
+function setBordercenter(prevsize: number, xLoc1: number,zLoc1: number,xLoc2: number,zLoc2: number,time: number):
+    set {BR.flag.isshrinking} to true
+    set {_time} to round({_time})
+    set {_xstep} to ({_xLoc2} - {_xLoc1}) / {_time}
+    set {_zstep} to ({_zLoc2} - {_zLoc1}) / {_time}
+    loop {_time} times:
+        set {_perc} to round(loop-number/{_time}*100)
+        send action bar "&7페이즈: &c%{BR.flag.phase}% &f| &7자기장 크기: &c%{_prevsize}% &7> &c%{BR.flag.size}% &f| &7자기장 축소 진행률: &c%{_perc}%%%" to all players
+        if {BR.debug} is true:
+            stop
+        add {_xstep} to {_xLoc1}
+        add {_zstep} to {_zLoc1}
+        set {BR.flag.borderCenter::x} to {_xLoc1}
+        set {BR.flag.borderCenter::z} to {_zLoc1}
+        execute console command "/worldborder center %{_xLoc1}% %{_zLoc1}%"
+        wait 1 tick
+    execute console command "/worldborder center %{_xLoc2}% %{_zLoc2}%"
+    set {BR.flag.isshrinking} to false
 function setBorder(size: number,time: number):
     set {_time} to round({_time})
     execute console command "/worldborder set %{_size}% %{_time}%"
@@ -20,20 +35,32 @@ function makeRandomcenter(prevSize: number,newSize: number,prevCenterx:number,pr
     add {_newSize} / 2 to {z1}
     subtract {_newSize} / 2 from {z2}
 
-    set {_ret::x} to random integer between {_x1} and {_x2}
-    set {_ret::z} to random integer between {_z1} and {_z2}
+    set {_rx} to random integer between {_x1} and {_x2}
+    set {_rz} to random integer between {_z1} and {_z2}
+
+    add {_rx} to {_ret::*}
+    add {_rz} to {_ret::*}
 
     return {_ret::*}
 
-function makeIngameborder(phase: number,size: number,centerx: number,centerz: number):
-    set {BR.flag.borderCenter::x} to {_centerx}
-    set {BR.flag.borderCenter::z} to {_centerz}
+function makeIngameborder(phase: number,size: number,prevsize: number,centerx: number,centerz: number):
     set {BR.flag.phase} to {_phase}
     set {BR.flag.size} to {_size}
     broadcast "{@p} 자기장이 줄어듭니다!"
     updateCompass()
-    setBordercenter({BR.flag.borderCenter::x},{BR.flag.borderCenter::z})
-    setBorder({_size},{_size}/{BR.flag.borderSpeed})
+    set {_speed} to round(({_prevsize} - {_size})/{BR.flag.borderSpeed}*20)
+    setBordercenter({_prevsize}, {BR.flag.borderCenter::x},{BR.flag.borderCenter::z},{_centerx},{_centerz},{_speed})
+    setBorder({_size},({_prevsize} - {_size})/{BR.flag.borderSpeed})
+
+function brShrinkborder():
+    set {_prevsize} to {BR.flag.size}
+    set {BR.flag.phase} to {BR.flag.phase} + 1
+    set {_newsize} to {BR.data.borderSize::%{BR.flag.phase}%}
+    broadcast "%{BR.flag.phase}% %{_newsize}%"
+    set {_coords::*} to makeRandomcenter({BR.flag.size},{_newsize},{BR.flag.borderCenter::x},{BR.flag.borderCenter::z})
+    set {BR.flag.borderSpeed} to 5
+    set {BR.flag.size} to {_newsize}
+    makeIngameborder({BR.flag.phase},{_newsize},{_prevsize},{_coords::1},{_coords::2})
 
 function brBorderinit():
     set {BR.flag.phase} to 1
@@ -42,7 +69,7 @@ function brBorderinit():
     set {BR.flag.borderCenter::z} to random integer between -1000 and 1000
     broadcast "%{BR.flag.borderCenter::x}%"
     set {BR.flag.borderSpeed} to 1000   
-    makeIngameborder(1,{BR.flag.borderSize},{BR.flag.borderCenter::x},{BR.flag.borderCenter::z})
+    makeIngameborder(1,{BR.flag.borderSize},{BR.flag.borderSize},{BR.flag.borderCenter::x},{BR.flag.borderCenter::z})
     
     #teamInit(2)
 
@@ -74,4 +101,11 @@ command /testborder:
         brBorderinit()
 command /testborder2:
     trigger:
-        brBorderinit()
+        brShrinkborder()
+
+command /brdebug:
+    trigger:
+        set {BR.debug} to true
+        wait 1 second
+        set {BR.debug} to false
+        set {BR.flag.isshrinking} to false

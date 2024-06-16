@@ -11,7 +11,21 @@ on load:
 
 function brGameinit(mode: text):
     set {BR.flag.isIngame} to true
+    set {BR.flag.gametime} to 0
+    set {BR.delay} to 10
     brBorderinit()
+    teamInit(2)
+    while {BR.flag.phase} < 6:
+        if {BR.debug} is true:
+            stop
+        if {BR.flag.isshrinking} is false:
+            add 1 to {BR.flag.gametime}
+            set {_left} to {BR.delay} - {BR.flag.gametime}
+            send action bar "&7페이즈: &c%{BR.flag.phase}% &f| &7자기장 크기: &c%{BR.flag.size}% &f| &7자기장 축소까지: &c%{_left}%초 남음" to all players
+        if {BR.flag.gametime} is {BR.delay}:
+            set {BR.flag.gametime} to 0
+            brShrinkborder()
+        wait 1 second
 
 command /br [<text>]:
     trigger:
@@ -19,8 +33,11 @@ command /br [<text>]:
             send "{@p} /br start" to player
             send "{@p} /br stop" to player
         if arg 1 is "start":
-            if {BR.flag.isIngame} is true:
-                send "{@p} 이미 게임이 진행중입니다." to player
-            else:
-                brGameinit("default")
+            #if {BR.flag.isIngame} is true:
+            #    send "{@p} 이미 게임이 진행중입니다." to player
+            #else:
+            brGameinit("default")
 
+on death:
+    if attacker is player:
+        drop 1 of gunpowder at victim's location
