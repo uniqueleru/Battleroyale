@@ -12,7 +12,7 @@ function updateCompass():
 
 function brSuply():
     set {_tmp} to {BR.flag.phase} + 1
-    set {_newsize} to {BR.data.borderSize::%{BR.flag.phase}%}
+    set {_newsize} to {BR.data.borderSize::%{_tmp}%}
     set {_coords::*} to makeRandomcenter({_newsize},10,{BR.flag.nextborderCenter.x},{BR.flag.nextborderCenter.z})
     set {_x} to {_coords::1}
     set {_z} to {_coords::2}
@@ -22,7 +22,8 @@ function brSuply():
         set y-coordinate of {_tmploc} to {_y} - 1
     set y-coordinate of {_tmploc} to {_y}
     set block at {_tmploc} to chest
-    set slot 0 of block at {_tmploc} to 5 of blaze rod
+    set {_int} to random integer between 1 and 5
+    set slot 0 of block at {_tmploc} to ({_int} of blaze rod)
     set {_int} to random integer between 0 and 2
     set slot 1 of block at {_tmploc} to ({_int} of netherite ingot)
     set {_int} to random integer between 5 and 10
@@ -31,8 +32,10 @@ function brSuply():
     set slot 3 of block at {_tmploc} to ({_int} of glowstone dust)
     set {_int} to random integer between 64 and 64
     set slot 4 of block at {_tmploc} to ({_int} of iron ingot)
-    set {_int} to random integer between 30 and 64
-    set slot 5 of block at {_tmploc} to ({_int} of gold ingot)
+    set {_int} to random integer between 32 and 64
+    set slot 5 of block at {_tmploc} to ({_int} of iron ingot)
+    set {_int} to random integer between 10 and 30
+    set slot 6 of block at {_tmploc} to ({_int} of gold ingot)
     broadcast "{@p} ( %{_x}%, %{_z}% ) 에 보급이 소환되었습니다!"
 
 on break:
@@ -85,15 +88,17 @@ on join:
     set player's max health to 20
     heal player
 on respawn:
+    wait 1 tick
     set player's max health to 20
     heal player
 on damage:
     if attacker is not player:
         set damage to damage / 2
 
+
 on death:
     if attacker is player:
         set {_rnd} to random integer between 1 and 3
         drop {_rnd} of gunpowder at victim's location
-        chance of 10%:
+        chance of 35%:
             drop 1 of amethyst shard at victim's location

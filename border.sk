@@ -66,7 +66,7 @@ function brShrinkborder():
     set {_prevsize} to {BR.flag.size}
     set {BR.flag.phase} to {BR.flag.phase} + 1
     set {_newsize} to {BR.data.borderSize::%{BR.flag.phase}%}
-    set {BR.flag.borderSpeed} to 3
+    set {BR.flag.borderSpeed} to 3.5
     set {BR.flag.size} to {_newsize}
     makeIngameborder({BR.flag.phase},{_newsize},{_prevsize},{BR.flag.nextborderCenter.x},{BR.flag.nextborderCenter.z})
 
@@ -81,7 +81,7 @@ function brBorderinit():
     #teamInit(2)
 
 function brGetspawnloc(type: text) :: location:
-    set {_space} to 300 #끝점에서 얼마나 여유를 두고 스폰시킬건지
+    set {_space} to 500 #끝점에서 얼마나 여유를 두고 스폰시킬건지
 
     if {_type} is "++":
         set {_x} to {BR.flag.borderCenter.x} + ({BR.flag.borderSize} / 2) - {_space}

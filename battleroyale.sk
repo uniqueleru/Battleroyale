@@ -3,8 +3,9 @@ options:
 
 on load:
     delete {BR.data.borderSize::*}
-    add 3000 to {BR.data.borderSize::*}
+    add 2500 to {BR.data.borderSize::*}
     add 2000 to {BR.data.borderSize::*}
+    add 1500 to {BR.data.borderSize::*}
     add 1000 to {BR.data.borderSize::*}
     add 500 to {BR.data.borderSize::*}
     add 100 to {BR.data.borderSize::*}
@@ -17,7 +18,7 @@ function brGameinit(mode: text):
     set {BR.delay} to 500
     brBorderinit()
     teamInit(2)
-    while {BR.flag.phase} < 6:
+    while {BR.flag.phase} < 7:
         if {BR.flag.isshrinking} is false:
             add 1 to {BR.flag.gametime}
             set {_left} to {BR.delay} - {BR.flag.gametime}
@@ -32,15 +33,25 @@ function brGameinit(mode: text):
                     send action bar "&7자기장 크기: &c%{BR.flag.size}% &f| &7자기장 축소까지: &c%{_left}%초 남음 &f| &7다음 자기장 중앙: &c(%{BR.flag.nextborderCenter.x}%,%{BR.flag.nextborderCenter.z}%)" to loop-player
                 else:
                     send action bar "&7자기장 크기: &c%{BR.flag.size}% &f| &7자기장 축소까지: &c%{_left}%초 남음 &f| &7다음 자기장 중앙: &c(%{BR.flag.nextborderCenter.x}%,%{BR.flag.nextborderCenter.z}%) &f| &4&l현재 다음 자기장 바깥에 있습니다!" to loop-player
+
         if {BR.flag.gametime} >= {BR.delay}:
             set {BR.flag.gametime} to 0
-            set {BR.delay} to {BR.delay} - 80
+            if {BR.flag.phase} is 2:
+                set {BR.delay} to 420
+            if {BR.flag.phase} is 3:
+                set {BR.delay} to 180
+            if {BR.flag.phase} is 4:
+                set {BR.delay} to 100
+            if {BR.flag.phase} is 5:
+                set {BR.delay} to 50
+            if {BR.flag.phase} is 6:
+                set {BR.delay} to 30
             brShrinkborder()
-        if {BR.flag.gametime} is 20:
-            if {BR.flag.phase} > 1:
-                brSuply()
-                brSuply()
         wait 1 second
+
+every 4 minute:
+    if {BR.flag.phase} is between 1 and 6:
+        brSuply()
 
 command /br [<text>]:
     trigger:

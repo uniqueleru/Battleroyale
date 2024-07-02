@@ -13,6 +13,9 @@ function splitTeam(size: number):
 
 function teamTP():
     execute console command "xp add @a 180 levels"
+    execute console command "team add 1"
+    execute console command "team modify 1 nametagVisibility never"
+    execute console command "team join 1 @a"
     loop 2 times: #왠진 모르겠는데 sublist 쓰면 첫번째 인덱스 루프가 그냥 박살남 ㅅㅂ 일단 임시로 이렇게 두고 만듬
         loop {BR.flag.team::%loop-number%::*}:
             if loop-number is 1:
