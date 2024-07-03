@@ -12,12 +12,15 @@ on load:
     add 10 to {BR.data.borderSize::*}
     add 0 to {BR.data.borderSize::*}
 
-function brGameinit(mode: text):
+function brGameinit(mode: text,size: number):
     set {BR.flag.isIngame} to true
     set {BR.flag.gametime} to 0
     set {BR.delay} to 500
     brBorderinit()
-    teamInit(2)
+    if {_mode} is "default":
+        teamInit({_size})
+    else if {_mode} is "custom":
+        teamTP({_size})
     while {BR.flag.phase} < 7:
         if {BR.flag.isshrinking} is false:
             add 1 to {BR.flag.gametime}
@@ -53,20 +56,25 @@ every 4 minute:
     if {BR.flag.phase} is between 1 and 6:
         brSuply()
 
-command /br [<text>]:
+command /br [<text>] [<number>]:
     trigger:
         if arg 1 is not set:
-            send "{@p} /br start" to player
-            send "{@p} /br stop" to player
-        if arg 1 is "start":
-            #if {BR.flag.isIngame} is true:
-            #    send "{@p} 이미 게임이 진행중입니다." to player
-            #else:
+            send "{@p} /br startdefault [size]" to player
+            send "{@p} /br startim [size]" to player
+        if arg 1 is "startdefault":
             set {BR.flag.phase} to 10
             wait 2 seconds
-            brGameinit("default")
+            brGameinit("default",arg 2)
+        else if arg 1 is "startim":
+            set {BR.flag.phase} to 10
+            wait 2 seconds
+            brGameinit("im",arg 2)
 
 
+
+command /chd:
+    trigger:
+        make player execute command "/setblock ~ ~ ~ tacz:gun_smith_table"
 
 command /총:
     trigger:
@@ -79,6 +87,11 @@ command /기본템설정:
             set slot (loop-counter)-1 of current inventory of player to loop-value
 
 command /기본템:
+    trigger:
+        copy {BR.items::*} to {_cpy::*}
+        give {_cpy::*} to player
+
+command /rlqhsxpa:
     trigger:
         copy {BR.items::*} to {_cpy::*}
         give {_cpy::*} to player
