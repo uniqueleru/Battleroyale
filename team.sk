@@ -3,7 +3,7 @@ options:
 
 function splitTeam(size: number):
     loop {_size} times:
-        delete {BR.flag.team.%{_size}%::*}
+        delete {BR.flag.team.%loop-number%::*}
     set {_plist::*} to all players
     set {_num} to size of {_plist::*}
     set {_playerperteam} to round({_num} / {_size})
