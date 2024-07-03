@@ -1,3 +1,6 @@
+options:
+    p: &c( 배틀로얄 ) &f
+
 function splitTeam(size: number):
     loop {_size} times:
         delete {BR.flag.team.%{_size}%::*}
@@ -19,8 +22,7 @@ function splitTeam(size: number):
         send "&7당신은 %{BR.player.team.%{_uuid}%}% 팀 입니다!" to loop-value
 
     loop {_size} times:
-        loop {BR.flag.team.%loop-number%::*}:
-
+        broadcast "{@p} %loop-number% 팀 - %{BR.flag.team.%loop-number%::*}%"
 
 function teamTP(size: number):
     execute console command "xp add @a 180 levels"
